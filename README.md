@@ -31,3 +31,9 @@ Shared foundational primitives for the portfolio apps.
 - Formatting tests use fixed locale, calendar, and time zone
 - Configuration tests verify flag resolution and environment propagation
 - Logger tests assert no-crash behavior for the default logger
+
+## Validation and compatibility
+
+Declared iOS 16 / macOS 14; verified development baseline Xcode 27.0 (27A266a), Swift 6.4. Older toolchains and minimum-OS runtime are unverified. CI validates the manifest, resolves dependencies, runs host tests with complete strict concurrency and warnings as errors, and builds the iOS Simulator product. No external dependencies.
+
+Owner: Anurag Chourasia. New APIs need concrete consumers, documentation, tests and explicit compatibility intent. MIT, Copyright (c) 2026 Anurag Chourasia. Published tags must not move.
