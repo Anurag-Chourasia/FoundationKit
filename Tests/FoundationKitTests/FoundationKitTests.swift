@@ -28,11 +28,12 @@ final class FoundationKitTests: XCTestCase {
         logger.log("default init", level: .info)
     }
 
-    func testDateFormatterProducesDeterministicOutput() {
+    func testDateFormatterProducesDeterministicOutput() throws {
+        let timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
         let formatter = DateFormatterFactory.make(
             dateFormat: "yyyy-MM-dd HH:mm",
             locale: Locale(identifier: "en_US_POSIX"),
-            timeZone: TimeZone(secondsFromGMT: 0)!,
+            timeZone: timeZone,
             calendar: Calendar(identifier: .gregorian)
         )
 
@@ -50,11 +51,12 @@ final class FoundationKitTests: XCTestCase {
         XCTAssertEqual(directFormatter.string(from: date), "1970-01-01")
     }
 
-    func testDateValueFormatterSupportsDirectInitialization() {
+    func testDateValueFormatterSupportsDirectInitialization() throws {
+        let timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
         let formatter = DateValueFormatter(
             dateFormat: "dd/MM/yyyy",
             locale: Locale(identifier: "en_GB"),
-            timeZone: TimeZone(secondsFromGMT: 0)!,
+            timeZone: timeZone,
             calendar: Calendar(identifier: .gregorian)
         )
 
