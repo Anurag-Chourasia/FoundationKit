@@ -167,3 +167,9 @@ logger.error("Player item failed to load stream manifest")
    - Builds host and simulator targets with complete strict concurrency (`-strict-concurrency=complete`) and `-warnings-as-errors`.
    - Comprehensive unit test suite covering formatters, dispatchers, clocks, and flags.
    - iOS Simulator product verification via `xcodebuild`.
+
+## Native clocks and private production logging
+
+`NativeClockAdapter` adapts a native `Swift.Clock` whose duration is `Duration` to the existing `AppClock` date contract. A captured wall-date anchor plus monotonic elapsed time preserves timestamp consumers; `sleep(for:tolerance:)` delegates to the native clock and respects cancellation. `FixedClock(now:)` remains available for deterministic date-based tests.
+
+`UnifiedLogger(subsystem:category:)` implements `AppLogger` with Apple's unified logging. Dynamic messages are private by default. `ConsoleLogger` remains an explicit compatibility/testing option.

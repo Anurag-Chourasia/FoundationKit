@@ -3,6 +3,22 @@ import XCTest
 @testable import FoundationKit
 
 final class FoundationKitTests: XCTestCase {
+    func testNativeClockAdapterTracksInjectedMonotonicTime() {
+        let native = AdjustableNativeClock()
+        let anchor = Date(timeIntervalSince1970: 1_000)
+        let clock = NativeClockAdapter(clock: native, anchorDate: anchor)
+        XCTAssertEqual(clock.now, anchor)
+        native.advance(by: .milliseconds(2_500))
+        XCTAssertEqual(clock.now.timeIntervalSince(anchor), 2.5, accuracy: 0.000_001)
+    }
+
+    func testNativeClockAdapterSleepHonorsCancellation() async {
+        let clock = NativeClockAdapter(clock: ContinuousClock())
+        let task = Task { try await clock.sleep(for: .seconds(3_600)) }
+        task.cancel()
+        do { try await task.value; XCTFail("Expected cancellation") } catch is CancellationError { } catch { XCTFail("Unexpected error: \(error)") }
+    }
+
     func testBuildEnvironmentExposesAllExpectedCasesAndRawValues() {
         XCTAssertEqual(BuildEnvironment.allCases, [.debug, .staging, .release])
         XCTAssertEqual(BuildEnvironment.debug.rawValue, "debug")
@@ -164,4 +180,15 @@ final class FoundationKitTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1.0)
     }
+}
+
+private final class AdjustableNativeClock: Clock, @unchecked Sendable {
+    typealias Instant = ContinuousClock.Instant
+    typealias Duration = Swift.Duration
+    private let lock = NSLock()
+    private var instant = ContinuousClock.now
+    var now: Instant { lock.withLock { instant } }
+    var minimumResolution: Duration { .nanoseconds(1) }
+    func advance(by duration: Duration) { lock.withLock { instant = instant.advanced(by: duration) } }
+    func sleep(until deadline: Instant, tolerance: Duration?) async throws { try Task.checkCancellation() }
 }
