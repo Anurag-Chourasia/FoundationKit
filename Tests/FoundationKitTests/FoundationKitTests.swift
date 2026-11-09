@@ -180,6 +180,46 @@ final class FoundationKitTests: XCTestCase {
 
         wait(for: [expectation], timeout: 1.0)
     }
+
+    func testByteCountFormatterProducesDeterministicOutputForZeroOrNegativeBytes() {
+        let formatter = ByteCountFormatterFactory.make()
+
+        XCTAssertEqual(formatter.string(fromByteCount: 0), "0 KB")
+        XCTAssertEqual(formatter.string(fromByteCount: -1), "0 KB")
+        XCTAssertEqual(formatter.string(fromByteCount: Int(0)), "0 KB")
+    }
+
+    func testByteCountFormatterProducesFormattedOutputForPositiveBytes() {
+        let formatter = ByteCountFormatterFactory.make()
+
+        let formatted1KB = formatter.string(fromByteCount: 1_024)
+        XCTAssertTrue(formatted1KB.contains("1") && formatted1KB.contains("B"))
+
+        let formatted1MB = formatter.string(fromByteCount: 1_048_576)
+        XCTAssertTrue(formatted1MB.contains("1") && formatted1MB.contains("B"))
+    }
+
+    func testByteCountFormatterSupportsCustomZeroStringAndOptions() {
+        let formatter = ByteCountFormatterFactory.make(
+            countStyle: .memory,
+            allowedUnits: [.useMB, .useGB],
+            zeroSizeString: "Zero Bytes"
+        )
+
+        XCTAssertEqual(formatter.string(fromByteCount: 0), "Zero Bytes")
+        XCTAssertEqual(formatter.string(fromByteCount: -50), "Zero Bytes")
+    }
+
+    func testByteCountValueFormatterSupportsDirectInitialization() {
+        let formatter = ByteCountValueFormatter(
+            countStyle: .file,
+            allowedUnits: .useAll,
+            zeroSizeString: "Empty"
+        )
+
+        XCTAssertEqual(formatter.string(fromByteCount: 0), "Empty")
+        XCTAssertFalse(formatter.string(fromByteCount: 2_048).isEmpty)
+    }
 }
 
 private final class AdjustableNativeClock: Clock, @unchecked Sendable {
