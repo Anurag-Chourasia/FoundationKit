@@ -44,6 +44,14 @@ final class FoundationKitTests: XCTestCase {
         logger.log("default init", level: .info)
     }
 
+    func testUnifiedLoggerAcceptsAllLogLevelsWithoutCrashing() {
+        let logger = UnifiedLogger(subsystem: "Tests", category: "Logging")
+
+        for level in LogLevel.allCases {
+            logger.log("test unified message", level: level)
+        }
+    }
+
     func testDateFormatterProducesDeterministicOutput() throws {
         let timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
         let formatter = DateFormatterFactory.make(
