@@ -220,6 +220,58 @@ final class FoundationKitTests: XCTestCase {
         XCTAssertEqual(formatter.string(fromByteCount: 0), "Empty")
         XCTAssertFalse(formatter.string(fromByteCount: 2_048).isEmpty)
     }
+
+    func testRelativeDateTimeFormatterProducesExpectedOutputForPastAndFutureDates() {
+        let formatter = RelativeDateTimeFormatterFactory.make(
+            dateTimeStyle: .numeric,
+            unitsStyle: .full,
+            locale: Locale(identifier: "en_US_POSIX")
+        )
+
+        let referenceDate = Date(timeIntervalSince1970: 1_700_000_000)
+        let oneHourAgo = referenceDate.addingTimeInterval(-3_600)
+        let inOneDay = referenceDate.addingTimeInterval(86_400)
+
+        let pastString = formatter.localizedString(for: oneHourAgo, relativeTo: referenceDate)
+        XCTAssertTrue(pastString.contains("hour") && pastString.contains("ago"))
+
+        let futureString = formatter.localizedString(for: inOneDay, relativeTo: referenceDate)
+        XCTAssertTrue(futureString.contains("in") && futureString.contains("day"))
+    }
+
+    func testRelativeDateTimeFormatterProducesExpectedOutputFromTimeInterval() {
+        let formatter = RelativeDateTimeFormatterFactory.make(
+            dateTimeStyle: .numeric,
+            unitsStyle: .short,
+            locale: Locale(identifier: "en_US_POSIX")
+        )
+
+        let result = formatter.localizedString(fromTimeInterval: -120)
+        XCTAssertFalse(result.isEmpty)
+    }
+
+    func testDateFormatterFactoryMakeRelativeProducesFunctionalFormatter() {
+        let formatter = DateFormatterFactory.makeRelative()
+        let ref = Date()
+        let past = ref.addingTimeInterval(-60)
+
+        let result = formatter.localizedString(for: past, relativeTo: ref)
+        XCTAssertFalse(result.isEmpty)
+    }
+
+    func testRelativeDateTimeValueFormatterSupportsDirectInitialization() {
+        let formatter = RelativeDateTimeValueFormatter(
+            dateTimeStyle: .named,
+            unitsStyle: .abbreviated,
+            locale: Locale(identifier: "en_US"),
+            calendar: Calendar(identifier: .gregorian)
+        )
+
+        let now = Date()
+        let yesterday = now.addingTimeInterval(-86_400)
+        XCTAssertFalse(formatter.localizedString(for: yesterday, relativeTo: now).isEmpty)
+        XCTAssertFalse(formatter.localizedString(for: now).isEmpty)
+    }
 }
 
 private final class AdjustableNativeClock: Clock, @unchecked Sendable {

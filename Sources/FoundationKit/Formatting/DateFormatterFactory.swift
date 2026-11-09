@@ -14,6 +14,20 @@ public enum DateFormatterFactory {
             calendar: calendar
         )
     }
+
+    public static func makeRelative(
+        dateTimeStyle: RelativeDateTimeFormatter.DateTimeStyle = .numeric,
+        unitsStyle: RelativeDateTimeFormatter.UnitsStyle = .full,
+        locale: Locale = Locale(identifier: "en_US_POSIX"),
+        calendar: Calendar = Calendar(identifier: .gregorian)
+    ) -> RelativeDateFormatting {
+        RelativeDateTimeFormatterFactory.make(
+            dateTimeStyle: dateTimeStyle,
+            unitsStyle: unitsStyle,
+            locale: locale,
+            calendar: calendar
+        )
+    }
 }
 
 public struct DateValueFormatter: DateFormatting, Sendable {
